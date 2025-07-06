@@ -1,0 +1,28 @@
+{
+  "games": [
+    {
+      "id": 1,
+      "title": "俄罗斯方块",
+      "file": "俄罗斯方块.html",
+      "category": "经典"
+    },
+    {
+      "id": 2,
+      "title": "贪吃蛇",
+      "file": "贪吃蛇.html",
+      "category": "休闲"
+    },
+    {
+      "id": 3,
+      "title": "扫雷",
+      "file": "扫雷.html",
+      "category": "益智"
+    },
+    {
+      "id": 4,
+      "title": "2048",
+      "file": "2048.html",
+      "category": "益智"
+    }
+  ]
+}
