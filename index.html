@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JZY的游戏集合</title>
+    <title>游戏集合 - JSON存储解决方案</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -15,6 +15,10 @@
         :root {
             --primary: #4361ee;
             --primary-dark: #3a56d4;
+            --secondary: #f72585;
+            --success: #4caf50;
+            --danger: #e74c3c;
+            --warning: #ff9800;
             --light: #f8f9fa;
             --dark: #212529;
             --gray: #6c757d;
@@ -30,7 +34,6 @@
             color: var(--dark);
             line-height: 1.6;
             min-height: 100vh;
-            padding-bottom: 40px;
         }
 
         .container {
@@ -49,7 +52,6 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            margin-bottom: 2rem;
         }
 
         .header-content {
@@ -73,56 +75,24 @@
             font-size: 2rem;
         }
 
-        .controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
+        /* 主内容区 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            padding: 3rem 0;
         }
 
-        .search-container {
-            position: relative;
+        @media (min-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
         }
 
-        .search-container input {
-            padding: 10px 15px 10px 40px;
-            border-radius: 50px;
-            border: none;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            width: 250px;
-            transition: var(--transition);
-        }
-
-        .search-container input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .search-container input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.3);
-            width: 300px;
-        }
-
-        .search-container i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        /* 游戏展示区 */
-        .games-section {
-            padding: 2rem 0;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
+        /* 配置说明区域 */
+        .config-section {
             background: white;
-            padding: 1.5rem;
+            padding: 2rem;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
         }
@@ -131,18 +101,126 @@
             font-size: 1.8rem;
             font-weight: 700;
             color: var(--primary);
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 10px;
         }
 
-        .section-subtitle {
-            font-size: 1rem;
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 4px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .info-box {
+            background: #eef7ff;
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--gray-light);
+            color: var(--dark);
+        }
+
+        .btn-secondary:hover {
+            background: #dcdcdc;
+        }
+
+        /* 游戏展示区 */
+        .games-section {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-container {
+            position: relative;
+            flex-grow: 1;
+        }
+
+        .search-container input {
+            padding: 10px 15px 10px 40px;
+            border-radius: 50px;
+            border: 1px solid #ddd;
+            width: 100%;
+            transition: var(--transition);
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
             color: var(--gray);
-            margin-top: 0.5rem;
         }
 
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 1.5rem;
         }
 
         .game-card {
@@ -196,10 +274,21 @@
             flex-direction: column;
         }
 
+        .game-category {
+            background: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin: 0 auto 10px;
+            font-weight: 600;
+        }
+
         .play-btn {
             display: block;
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: var(--primary);
             color: white;
             text-align: center;
@@ -224,7 +313,7 @@
             text-align: center;
         }
 
-        /* 加载动画 */
+        /* 加载状态 */
         .loader {
             text-align: center;
             padding: 40px 0;
@@ -243,44 +332,6 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        /* 手动添加区域 */
-        .manual-section {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            margin-top: 3rem;
-        }
-
-        .manual-controls {
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .manual-controls input {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-
-        .manual-controls button {
-            padding: 12px 25px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .manual-controls button:hover {
-            background: var(--primary-dark);
         }
 
         /* 页脚样式 */
@@ -311,26 +362,8 @@
                 gap: 20px;
             }
             
-            .search-container input {
-                width: 100%;
-            }
-            
-            .search-container input:focus {
-                width: 100%;
-            }
-            
             .games-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            }
-            
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            
-            .manual-controls {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             }
         }
 
@@ -352,171 +385,131 @@
             <div class="header-content">
                 <div class="logo">
                     <i class="fas fa-gamepad"></i>
-                    <h1>根目录游戏集合</h1>
-                </div>
-                <div class="controls">
-                    <div class="search-container">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="search-input" placeholder="搜索游戏...">
-                    </div>
+                    <h1>游戏集合 - JSON存储方案</h1>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- 游戏展示区 -->
-    <section class="games-section">
-        <div class="container">
-            <div class="section-header">
-                <div>
-                    <h2 class="section-title">根目录游戏列表</h2>
-                    <p class="section-subtitle">自动检测根目录下的HTML游戏文件</p>
-                </div>
-                <div>
-                    <span id="game-count">扫描中...</span>
-                </div>
-            </div>
-            
-            <div class="loader" id="loader">
-                <div class="loader-spinner"></div>
-                <p>正在扫描根目录文件...</p>
-            </div>
-            
-            <div class="games-grid" id="games-grid">
-                <!-- 游戏卡片将通过JavaScript动态生成 -->
-            </div>
-        </div>
-    </section>
+    <!-- 主内容区 -->
+    <div class="container">
+        <div class="main-content">
 
-    <!-- 手动添加区域 -->
-    <section class="manual-section">
-        <div class="container">
-            <h2 class="section-title">手动添加游戏</h2>
-            <p>如果自动检测不到您的游戏，请在此手动添加：</p>
-            
-            <div class="manual-controls">
-                <input type="text" id="manual-game" placeholder="输入游戏文件名（例如：game.html）">
-                <button id="add-game">
-                    <i class="fas fa-plus"></i> 添加游戏
-                </button>
-            </div>
-            
-            <div id="manual-games" style="margin-top: 20px;">
-                <!-- 手动添加的游戏将显示在这里 -->
+            <!-- 游戏展示区 -->
+            <div class="games-section">
+                <div class="controls">
+                    <h2 class="section-title">游戏列表</h2>
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="搜索游戏...">
+                    </div>
+                </div>
+                
+                <p>已加载 <span id="game-count">0</span> 个游戏</p>
+                
+                <div class="loader" id="loader">
+                    <div class="loader-spinner"></div>
+                    <p>正在加载游戏数据...</p>
+                </div>
+                
+                <div class="games-grid" id="games-grid">
+                    <!-- 游戏卡片将通过JavaScript动态生成 -->
+                </div>
+                
+                <div id="no-games" style="text-align: center; padding: 40px 0; display: none;">
+                    <i class="fas fa-gamepad" style="font-size: 4rem; color: #4361ee; margin-bottom: 20px;"></i>
+                    <h3>未找到游戏</h3>
+                    <p>请检查games.json文件是否存在且格式正确</p>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
 
     <!-- 页脚 -->
     <footer>
         <div class="container">
             <div class="footer-content">
-                <p>根目录游戏集合网站</p>
-                <p class="copyright">自动检测并展示根目录下的HTML游戏文件 | 托管于 GitHub Pages</p>
+                <p>独立游戏文件存储解决方案</p>
+                <p class="copyright">通过games.json文件管理游戏集合 | 托管于 GitHub Pages</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // 自动检测游戏文件 - 更可靠的方法
-        async function detectGameFiles() {
-            const loader = document.getElementById('loader');
-            const gamesGrid = document.getElementById('games-grid');
-            const gameCount = document.getElementById('game-count');
+        // 游戏数据URL
+        const GAMES_JSON_URL = 'games.json';
+        
+        // DOM元素
+        const gamesGrid = document.getElementById('games-grid');
+        const noGames = document.getElementById('no-games');
+        const gameCount = document.getElementById('game-count');
+        const loader = document.getElementById('loader');
+        const searchInput = document.getElementById('search-input');
+        const reloadBtn = document.getElementById('reload-btn');
+        
+        // 存储游戏数据
+        let gamesData = [];
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 加载游戏数据
+            loadGames();
+            
+            // 设置重新加载按钮
+            reloadBtn.addEventListener('click', loadGames);
+            
+            // 设置搜索功能
+            searchInput.addEventListener('input', filterGames);
+        });
+        
+        // 加载游戏数据
+        async function loadGames() {
+            showLoader();
             
             try {
-                // 尝试获取预定义的游戏列表
-                const games = await getGameList();
+                const response = await fetch(GAMES_JSON_URL);
                 
-                // 更新游戏数量
-                gameCount.textContent = `${games.length} 个游戏`;
+                if (!response.ok) {
+                    throw new Error(`文件加载失败: ${response.status} ${response.statusText}`);
+                }
                 
-                // 渲染游戏
-                renderGames(games);
+                const data = await response.json();
+                gamesData = data.games || [];
                 
-                // 隐藏加载动画
-                loader.style.display = 'none';
+                renderGames(gamesData);
+                updateGameCount();
                 
-                // 设置搜索功能
-                setupSearch(games);
+                if (gamesData.length === 0) {
+                    noGames.style.display = 'block';
+                } else {
+                    noGames.style.display = 'none';
+                }
+                
+                hideLoader();
             } catch (error) {
-                console.error('扫描游戏文件失败:', error);
-                loader.innerHTML = `
-                    <div style="color: #e74c3c; padding: 20px;">
+                console.error('加载游戏数据失败:', error);
+                hideLoader();
+                noGames.style.display = 'block';
+                noGames.innerHTML = `
+                    <div style="color: #e74c3c;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                        <h3>自动扫描失败</h3>
-                        <p>请使用下方的手动添加功能</p>
-                        <p>错误信息: ${error.message}</p>
+                        <h3>加载游戏数据失败</h3>
+                        <p>${error.message}</p>
+                        <p style="margin-top: 20px;">请检查games.json文件是否存在且格式正确</p>
                     </div>
                 `;
             }
         }
         
-        // 获取游戏列表 - 更可靠的方法
-        async function getGameList() {
-            // 尝试从本地存储获取手动添加的游戏
-            const manualGames = JSON.parse(localStorage.getItem('manualGames') || '[]');
-            
-            // 尝试自动检测（使用预定义列表或手动添加）
-            const autoGames = await tryAutoDetection();
-            
-            // 合并游戏列表并去重
-            const allGames = [...autoGames, ...manualGames];
-            const uniqueGames = Array.from(new Set(allGames.map(g => g.file)))
-                .map(file => {
-                    return allGames.find(g => g.file === file);
-                });
-            
-            return uniqueGames;
-        }
-        
-        // 尝试自动检测
-        async function tryAutoDetection() {
-            // 这里使用预定义的游戏列表作为示例
-            // 在实际使用中，您可以替换为真实的游戏文件名
-            const exampleGames = [
-                "snake-game.html",
-                "tetris.html",
-                "memory-match.html",
-                "puzzle-game.html",
-                "space-invaders.html"
-            ];
-            
-            // 检查这些文件是否存在
-            const existingGames = [];
-            
-            for (const file of exampleGames) {
-                try {
-                    const response = await fetch(file, { method: 'HEAD' });
-                    if (response.ok) {
-                        const name = file.replace('.html', '')
-                                         .replace(/-/g, ' ')
-                                         .replace(/_/g, ' ')
-                                         .replace(/\b\w/g, c => c.toUpperCase());
-                        existingGames.push({
-                            title: name,
-                            file: file
-                        });
-                    }
-                } catch (e) {
-                    // 文件不存在，忽略
-                }
-            }
-            
-            return existingGames;
-        }
-        
-        // 渲染游戏函数
+        // 渲染游戏
         function renderGames(games) {
-            const gamesGrid = document.getElementById('games-grid');
             gamesGrid.innerHTML = '';
             
             if (games.length === 0) {
                 gamesGrid.innerHTML = `
                     <div class="no-results" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
                         <i class="fas fa-gamepad" style="font-size: 4rem; color: #4361ee; margin-bottom: 20px;"></i>
-                        <h3>未找到游戏文件</h3>
-                        <p>请使用手动添加功能或确保游戏文件在根目录</p>
+                        <h3>未找到匹配的游戏</h3>
                     </div>
                 `;
                 return;
@@ -531,6 +524,7 @@
                         <h3 class="game-title">${game.title}</h3>
                     </div>
                     <div class="card-content">
+                        ${game.category ? `<span class="game-category">${game.category}</span>` : ''}
                         <p class="file-info">
                             <i class="fas fa-file-code"></i> ${game.file}
                         </p>
@@ -543,106 +537,42 @@
             });
         }
         
-        // 设置搜索功能
-        function setupSearch(games) {
-            const searchInput = document.getElementById('search-input');
+        // 过滤游戏
+        function filterGames() {
+            const searchTerm = searchInput.value.toLowerCase();
             
-            searchInput.addEventListener('input', () => {
-                const searchTerm = searchInput.value.toLowerCase();
-                
-                if (searchTerm === '') {
-                    renderGames(games);
-                    return;
-                }
-                
-                const filteredGames = games.filter(game => 
-                    game.title.toLowerCase().includes(searchTerm) || 
-                    game.file.toLowerCase().includes(searchTerm)
-                );
-                
-                renderGames(filteredGames);
-            });
-        }
-        
-        // 手动添加游戏功能
-        function setupManualAdd() {
-            const addButton = document.getElementById('add-game');
-            const gameInput = document.getElementById('manual-game');
-            const manualGamesContainer = document.getElementById('manual-games');
-            
-            // 加载已保存的手动游戏
-            loadManualGames();
-            
-            addButton.addEventListener('click', () => {
-                const gameFile = gameInput.value.trim();
-                
-                if (!gameFile) {
-                    alert('请输入游戏文件名');
-                    return;
-                }
-                
-                if (!gameFile.endsWith('.html')) {
-                    alert('文件名必须以.html结尾');
-                    return;
-                }
-                
-                // 添加到列表
-                addManualGame(gameFile);
-                
-                // 清空输入框
-                gameInput.value = '';
-            });
-            
-            function addManualGame(file) {
-                const name = file.replace('.html', '')
-                                 .replace(/-/g, ' ')
-                                 .replace(/_/g, ' ')
-                                 .replace(/\b\w/g, c => c.toUpperCase());
-                
-                // 保存到本地存储
-                const manualGames = JSON.parse(localStorage.getItem('manualGames') || '[]');
-                manualGames.push({ title: name, file: file });
-                localStorage.setItem('manualGames', JSON.stringify(manualGames));
-                
-                // 重新加载游戏
-                detectGameFiles();
-                
-                // 显示添加成功消息
-                const message = document.createElement('div');
-                message.innerHTML = `
-                    <div style="background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-top: 10px;">
-                        <i class="fas fa-check-circle"></i> 已添加游戏: ${file}
-                    </div>
-                `;
-                manualGamesContainer.appendChild(message);
-                
-                // 3秒后消失
-                setTimeout(() => {
-                    message.style.opacity = '0';
-                    setTimeout(() => message.remove(), 300);
-                }, 3000);
+            if (!searchTerm) {
+                renderGames(gamesData);
+                updateGameCount();
+                return;
             }
             
-            function loadManualGames() {
-                const manualGames = JSON.parse(localStorage.getItem('manualGames') || '[]');
-                if (manualGames.length > 0) {
-                    const list = document.createElement('div');
-                    list.innerHTML = `
-                        <h3 style="margin: 15px 0 10px;">已手动添加的游戏：</h3>
-                        <ul style="list-style: none; padding: 0;">
-                            ${manualGames.map(game => `<li><i class="fas fa-file-code"></i> ${game.file}</li>`).join('')}
-                        </ul>
-                    `;
-                    manualGamesContainer.appendChild(list);
-                }
-            }
+            const filteredGames = gamesData.filter(game => 
+                game.title.toLowerCase().includes(searchTerm) || 
+                (game.category && game.category.toLowerCase().includes(searchTerm)) ||
+                game.file.toLowerCase().includes(searchTerm)
+            );
+            
+            renderGames(filteredGames);
+            gameCount.textContent = filteredGames.length;
         }
         
-        // 初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            detectGameFiles();
-            setupManualAdd();
-        });
+        // 更新游戏计数
+        function updateGameCount() {
+            gameCount.textContent = gamesData.length;
+        }
+        
+        // 显示加载状态
+        function showLoader() {
+            loader.style.display = 'block';
+            gamesGrid.innerHTML = '';
+            noGames.style.display = 'none';
+        }
+        
+        // 隐藏加载状态
+        function hideLoader() {
+            loader.style.display = 'none';
+        }
     </script>
 </body>
-</html>
+                        </html>
