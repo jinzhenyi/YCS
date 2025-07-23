@@ -120,7 +120,7 @@
             }
         }
 
-        // 创建随机游戏板
+        // 创建随机游戏板.
         function createRandomBoard() {
             const board = [];
             for (let row = 0; row < config.rows; row++) {
