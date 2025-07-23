@@ -1,1 +1,366 @@
-测试
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消消乐游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+        
+        .game-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        
+        .score-board {
+            margin-bottom: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            gap: 5px;
+            background-color: #ddd;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .tile {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .tile:hover {
+            transform: scale(1.05);
+        }
+        
+        .tile.selected {
+            border: 3px solid #333;
+            box-sizing: border-box;
+        }
+        
+        .controls {
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>消消乐</h1>
+    <div class="game-container">
+        <div class="score-board">分数: <span id="score">0</span></div>
+        <div id="game-board"></div>
+    </div>
+    <div class="controls">
+        <button id="restart-btn">重新开始</button>
+    </div>
+
+    <script>
+        // 游戏配置
+        const config = {
+            rows: 8,
+            cols: 8,
+            types: ['🍎', '🍐', '🍊', '🍇', '🍓', '🍒', '🍑', '🥭'],
+            scorePerMatch: 10
+        };
+
+        // 游戏状态
+        let gameBoard = [];
+        let score = 0;
+        let selectedTile = null;
+
+        // DOM 元素
+        const boardElement = document.getElementById('game-board');
+        const scoreElement = document.getElementById('score');
+        const restartButton = document.getElementById('restart-btn');
+
+        // 初始化游戏
+        function initGame() {
+            score = 0;
+            scoreElement.textContent = score;
+            gameBoard = createRandomBoard();
+            renderBoard();
+            
+            // 确保初始状态没有可消除的组合
+            while (findMatches().length > 0) {
+                removeMatches();
+                fillEmptySpaces();
+                renderBoard();
+            }
+        }
+
+        // 创建随机游戏板
+        function createRandomBoard() {
+            const board = [];
+            for (let row = 0; row < config.rows; row++) {
+                board[row] = [];
+                for (let col = 0; col < config.cols; col++) {
+                    // 确保不会一开始就形成3个相同的连线
+                    let validTypes = [...config.types];
+                    
+                    // 检查水平方向
+                    if (col >= 2 && 
+                        board[row][col-1] === board[row][col-2]) {
+                        validTypes = validTypes.filter(type => type !== board[row][col-1]);
+                    }
+                    
+                    // 检查垂直方向
+                    if (row >= 2 && 
+                        board[row-1][col] === board[row-2][col]) {
+                        validTypes = validTypes.filter(type => type !== board[row-1][col]);
+                    }
+                    
+                    // 随机选择一个有效的类型
+                    const randomIndex = Math.floor(Math.random() * validTypes.length);
+                    board[row][col] = validTypes[randomIndex];
+                }
+            }
+            return board;
+        }
+
+        // 渲染游戏板
+        function renderBoard() {
+            boardElement.innerHTML = '';
+            for (let row = 0; row < config.rows; row++) {
+                for (let col = 0; col < config.cols; col++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.dataset.row = row;
+                    tile.dataset.col = col;
+                    tile.textContent = gameBoard[row][col];
+                    
+                    // 添加点击事件
+                    tile.addEventListener('click', () => handleTileClick(row, col));
+                    
+                    // 如果是选中的 tile，添加选中样式
+                    if (selectedTile && selectedTile.row === row && selectedTile.col === col) {
+                        tile.classList.add('selected');
+                    }
+                    
+                    boardElement.appendChild(tile);
+                }
+            }
+        }
+
+        // 处理方块点击
+        function handleTileClick(row, col) {
+            // 如果没有选中的方块，选中当前方块
+            if (!selectedTile) {
+                selectedTile = { row, col };
+                renderBoard();
+                return;
+            }
+            
+            // 如果点击的是已选中的方块，取消选中
+            if (selectedTile.row === row && selectedTile.col === col) {
+                selectedTile = null;
+                renderBoard();
+                return;
+            }
+            
+            // 检查是否相邻
+            if (isAdjacent(selectedTile, { row, col })) {
+                // 交换方块
+                swapTiles(selectedTile, { row, col });
+                renderBoard();
+                
+                // 检查是否有匹配
+                const matches = findMatches();
+                if (matches.length > 0) {
+                    // 有匹配，移除并计分
+                    removeMatches(matches);
+                    score += matches.length * config.scorePerMatch;
+                    scoreElement.textContent = score;
+                    
+                    // 填充空白并继续检查
+                    setTimeout(() => {
+                        fillEmptySpaces();
+                        renderBoard();
+                        
+                        // 检查新的匹配
+                        setTimeout(() => {
+                            checkAndRemoveNewMatches();
+                        }, 500);
+                    }, 500);
+                } else {
+                    // 没有匹配，交换回来
+                    setTimeout(() => {
+                        swapTiles(selectedTile, { row, col });
+                        selectedTile = null;
+                        renderBoard();
+                    }, 500);
+                }
+            } else {
+                // 不相邻，选中新的方块
+                selectedTile = { row, col };
+                renderBoard();
+            }
+        }
+
+        // 检查是否相邻
+        function isAdjacent(tile1, tile2) {
+            const rowDiff = Math.abs(tile1.row - tile2.row);
+            const colDiff = Math.abs(tile1.col - tile2.col);
+            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+        }
+
+        // 交换方块
+        function swapTiles(tile1, tile2) {
+            const temp = gameBoard[tile1.row][tile1.col];
+            gameBoard[tile1.row][tile1.col] = gameBoard[tile2.row][tile2.col];
+            gameBoard[tile2.row][tile2.col] = temp;
+            selectedTile = null;
+        }
+
+        // 查找匹配的方块
+        function findMatches() {
+            const matches = [];
+            
+            // 检查水平匹配
+            for (let row = 0; row < config.rows; row++) {
+                let col = 0;
+                while (col < config.cols - 2) {
+                    const current = gameBoard[row][col];
+                    if (current && 
+                        current === gameBoard[row][col+1] && 
+                        current === gameBoard[row][col+2]) {
+                        
+                        // 检查是否有更多连续的
+                        let endCol = col + 2;
+                        while (endCol + 1 < config.cols && gameBoard[row][endCol+1] === current) {
+                            endCol++;
+                        }
+                        
+                        // 添加匹配的方块
+                        for (let c = col; c <= endCol; c++) {
+                            matches.push({ row, col: c });
+                        }
+                        
+                        col = endCol + 1;
+                    } else {
+                        col++;
+                    }
+                }
+            }
+            
+            // 检查垂直匹配
+            for (let col = 0; col < config.cols; col++) {
+                let row = 0;
+                while (row < config.rows - 2) {
+                    const current = gameBoard[row][col];
+                    if (current && 
+                        current === gameBoard[row+1][col] && 
+                        current === gameBoard[row+2][col]) {
+                        
+                        // 检查是否有更多连续的
+                        let endRow = row + 2;
+                        while (endRow + 1 < config.rows && gameBoard[endRow+1][col] === current) {
+                            endRow++;
+                        }
+                        
+                        // 添加匹配的方块
+                        for (let r = row; r <= endRow; r++) {
+                            matches.push({ row: r, col });
+                        }
+                        
+                        row = endRow + 1;
+                    } else {
+                        row++;
+                    }
+                }
+            }
+            
+            return matches;
+        }
+
+        // 移除匹配的方块
+        function removeMatches(matches) {
+            matches.forEach(match => {
+                gameBoard[match.row][match.col] = null;
+            });
+            renderBoard();
+        }
+
+        // 填充空白位置
+        function fillEmptySpaces() {
+            // 对每一列处理
+            for (let col = 0; col < config.cols; col++) {
+                // 收集非空元素
+                const column = [];
+                for (let row = 0; row < config.rows; row++) {
+                    if (gameBoard[row][col] !== null) {
+                        column.push(gameBoard[row][col]);
+                    }
+                }
+                
+                // 计算需要补充的数量
+                const emptyCount = config.rows - column.length;
+                
+                // 填充新元素到顶部
+                for (let i = 0; i < emptyCount; i++) {
+                    const randomIndex = Math.floor(Math.random() * config.types.length);
+                    column.unshift(config.types[randomIndex]);
+                }
+                
+                // 更新列
+                for (let row = 0; row < config.rows; row++) {
+                    gameBoard[row][col] = column[row];
+                }
+            }
+        }
+
+        // 检查并移除新的匹配
+        function checkAndRemoveNewMatches() {
+            const newMatches = findMatches();
+            if (newMatches.length > 0) {
+                removeMatches(newMatches);
+                score += newMatches.length * config.scorePerMatch;
+                scoreElement.textContent = score;
+                
+                setTimeout(() => {
+                    fillEmptySpaces();
+                    renderBoard();
+                    setTimeout(checkAndRemoveNewMatches, 500);
+                }, 500);
+            }
+        }
+
+        // 事件监听
+        restartButton.addEventListener('click', initGame);
+
+        // 启动游戏
+        initGame();
+    </script>
+</body>
+</html>
