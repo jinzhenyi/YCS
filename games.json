@@ -23,6 +23,12 @@
       "title": "2048",
       "file": "2048.html",
       "category": "益智"
+    },
+    {
+      "id": 5,
+      "title": "消消乐",
+      "file": "消消乐.html",
+      "category": "益智"
     }
   ]
 }
