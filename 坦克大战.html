@@ -24,6 +24,8 @@
         #gameCanvas {
             display: block;
             background-color: #000;
+            width: 100%;
+            height: 100%;
             touch-action: none;
         }
         
@@ -174,8 +176,15 @@
         
         // 初始化游戏
         function initGame() {
+            console.log("初始化游戏...");
+            
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
+            
+            if (!canvas || !ctx) {
+                console.error("无法获取画布或绘图上下文");
+                return;
+            }
             
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
@@ -209,15 +218,25 @@
             document.getElementById('restartBtn').addEventListener('click', restartGame);
             
             // 开始游戏循环
-            gameLoop();
+            requestAnimationFrame(gameLoop);
         }
         
         // 调整画布大小
         function resizeCanvas() {
             gameWidth = window.innerWidth;
             gameHeight = window.innerHeight;
-            canvas.width = gameWidth;
-            canvas.height = gameHeight;
+            
+            // 处理高分屏
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = gameWidth * dpr;
+            canvas.height = gameHeight * dpr;
+            ctx.scale(dpr, dpr);
+            
+            // 设置CSS尺寸
+            canvas.style.width = gameWidth + 'px';
+            canvas.style.height = gameHeight + 'px';
+            
+            console.log(`画布尺寸: ${gameWidth}x${gameHeight}, DPR: ${dpr}`);
         }
         
         // 创建墙壁
@@ -240,7 +259,6 @@
                 const x = Math.floor(Math.random() * (gameWidth - 2 * WALL_SIZE) / WALL_SIZE) * WALL_SIZE + WALL_SIZE;
                 const y = Math.floor(Math.random() * (gameHeight - 2 * WALL_SIZE) / WALL_SIZE * WALL_SIZE + WALL_SIZE;
                 
-                // 确保不会在玩家初始位置生成墙
                 if (!(x >= playerTank.x - WALL_SIZE && x <= playerTank.x + TANK_SIZE + WALL_SIZE && 
                       y >= playerTank.y - WALL_SIZE && y <= playerTank.y + TANK_SIZE + WALL_SIZE)) {
                     walls.push({x, y, width: WALL_SIZE, height: WALL_SIZE});
@@ -252,19 +270,19 @@
         function spawnEnemy() {
             if (!gameRunning) return;
             
-            const side = Math.floor(Math.random() * 3); // 0: 上, 1: 左, 2: 右
+            const side = Math.floor(Math.random() * 3);
             
             let x, y;
             switch (side) {
-                case 0: // 上
+                case 0:
                     x = Math.floor(Math.random() * (gameWidth - ENEMY_SIZE));
                     y = WALL_SIZE;
                     break;
-                case 1: // 左
+                case 1:
                     x = WALL_SIZE;
                     y = Math.floor(Math.random() * (gameHeight - ENEMY_SIZE));
                     break;
-                case 2: // 右
+                case 2:
                     x = gameWidth - WALL_SIZE - ENEMY_SIZE;
                     y = Math.floor(Math.random() * (gameHeight - ENEMY_SIZE));
                     break;
@@ -287,7 +305,6 @@
         function handleKeyDown(e) {
             keys[e.key] = true;
             
-            // 空格键开火
             if (e.key === ' ' && gameRunning) {
                 fireBullet();
             }
@@ -299,7 +316,6 @@
         
         // 触摸控制设置
         function setupTouchControls() {
-            // 方向控制
             const directions = ['up', 'left', 'right', 'down'];
             
             directions.forEach(dir => {
@@ -321,7 +337,6 @@
                 });
             });
             
-            // 开火按钮
             document.getElementById('fireBtn').addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 if (gameRunning) {
@@ -406,7 +421,6 @@
             // 墙壁碰撞检测
             walls.forEach(wall => {
                 if (checkCollision(playerTank, wall)) {
-                    // 根据方向回退
                     switch (playerTank.direction) {
                         case 'up':
                             playerTank.y = wall.y + wall.height;
@@ -691,7 +705,7 @@
         }
         
         // 启动游戏
-        window.onload = initGame;
+        window.addEventListener('load', initGame);
     </script>
 </body>
 </html>
