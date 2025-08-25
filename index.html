@@ -66,13 +66,39 @@
             gap: 12px;
         }
 
-        .logo h1 {
-            font-size: 1.8rem;
+        /* 彩色Logo样式 - 移除所有空格 */
+        .color-logo {
+            font-size: 2.2rem;
             font-weight: 700;
+            letter-spacing: 0px; /* 负值使字母更紧密 */
+            display: flex;
         }
+        
+        .color-logo span {
+            display: inline-block;
+            transition: transform 0.2s ease;
+            margin-right: 0px; /* 负边距移除字母间空隙 */
+        }
+        
+        .color-logo:hover span:nth-child(1) { transform: translateY(-4px) rotate(-3deg); }
+        .color-logo:hover span:nth-child(2) { transform: translateY(-6px) rotate(2deg); }
+        .color-logo:hover span:nth-child(3) { transform: translateY(-8px) rotate(4deg); }
+        .color-logo:hover span:nth-child(4) { transform: translateY(-5px) rotate(-2deg); }
+        .color-logo:hover span:nth-child(5) { transform: translateY(-7px) rotate(3deg); }
+        .color-logo:hover span:nth-child(6) { transform: translateY(-3px) rotate(-1deg); }
+        .color-logo:hover span:nth-child(7) { transform: translateY(-5px) rotate(2deg); }
+        
+        .color-logo span:nth-child(1) { color: #4285F4; } /* j */
+        .color-logo span:nth-child(2) { color: #EA4335; } /* z */
+        .color-logo span:nth-child(3) { color: #FBBC05; } /* y */
+        .color-logo span:nth-child(4) { color: #4285F4; } /* g */
+        .color-logo span:nth-child(5) { color: #34A853; } /* a */
+        .color-logo span:nth-child(6) { color: #EA4335; } /* m */
+        .color-logo span:nth-child(7) { color: #FBBC05; } /* e */
 
         .logo i {
             font-size: 2rem;
+            color: white;
         }
 
         /* 主内容区 */
@@ -361,9 +387,13 @@
                 flex-direction: column;
                 gap: 20px;
             }
-            
+
             .games-grid {
                 grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+            
+            .color-logo {
+                font-size: 1.8rem;
             }
         }
 
@@ -372,7 +402,7 @@
                 grid-template-columns: 1fr;
             }
             
-            .logo h1 {
+            .color-logo {
                 font-size: 1.5rem;
             }
         }
@@ -385,7 +415,9 @@
             <div class="header-content">
                 <div class="logo">
                     <i class="fas fa-gamepad"></i>
-                    <h1>游戏集合 - JSON存储方案</h1>
+                    <div class="color-logo">
+                        <span>j</span><span>z</span><span>y</span><span>g</span><span>a</span><span>m</span><span>e</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -404,18 +436,18 @@
                         <input type="text" id="search-input" placeholder="搜索游戏...">
                     </div>
                 </div>
-                
+
                 <p>已加载 <span id="game-count">0</span> 个游戏</p>
-                
+
                 <div class="loader" id="loader">
                     <div class="loader-spinner"></div>
                     <p>正在加载游戏数据...</p>
                 </div>
-                
+
                 <div class="games-grid" id="games-grid">
                     <!-- 游戏卡片将通过JavaScript动态生成 -->
                 </div>
-                
+
                 <div id="no-games" style="text-align: center; padding: 40px 0; display: none;">
                     <i class="fas fa-gamepad" style="font-size: 4rem; color: #4361ee; margin-bottom: 20px;"></i>
                     <h3>未找到游戏</h3>
@@ -438,7 +470,7 @@
     <script>
         // 游戏数据URL
         const GAMES_JSON_URL = 'games.json';
-        
+
         // DOM元素
         const gamesGrid = document.getElementById('games-grid');
         const noGames = document.getElementById('no-games');
@@ -446,45 +478,45 @@
         const loader = document.getElementById('loader');
         const searchInput = document.getElementById('search-input');
         const reloadBtn = document.getElementById('reload-btn');
-        
+
         // 存储游戏数据
         let gamesData = [];
-        
+
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             // 加载游戏数据
             loadGames();
-            
+
             // 设置重新加载按钮
             reloadBtn.addEventListener('click', loadGames);
-            
+
             // 设置搜索功能
             searchInput.addEventListener('input', filterGames);
         });
-        
+
         // 加载游戏数据
         async function loadGames() {
             showLoader();
-            
+
             try {
                 const response = await fetch(GAMES_JSON_URL);
-                
+
                 if (!response.ok) {
                     throw new Error(`文件加载失败: ${response.status} ${response.statusText}`);
                 }
-                
+
                 const data = await response.json();
                 gamesData = data.games || [];
-                
+
                 renderGames(gamesData);
                 updateGameCount();
-                
+
                 if (gamesData.length === 0) {
                     noGames.style.display = 'block';
                 } else {
                     noGames.style.display = 'none';
                 }
-                
+
                 hideLoader();
             } catch (error) {
                 console.error('加载游戏数据失败:', error);
@@ -500,11 +532,11 @@
                 `;
             }
         }
-        
+
         // 渲染游戏
         function renderGames(games) {
             gamesGrid.innerHTML = '';
-            
+
             if (games.length === 0) {
                 gamesGrid.innerHTML = `
                     <div class="no-results" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
@@ -514,7 +546,7 @@
                 `;
                 return;
             }
-            
+
             games.forEach(game => {
                 const gameCard = document.createElement('div');
                 gameCard.className = 'game-card';
@@ -536,43 +568,43 @@
                 gamesGrid.appendChild(gameCard);
             });
         }
-        
+
         // 过滤游戏
         function filterGames() {
             const searchTerm = searchInput.value.toLowerCase();
-            
+
             if (!searchTerm) {
                 renderGames(gamesData);
                 updateGameCount();
                 return;
             }
-            
+
             const filteredGames = gamesData.filter(game => 
                 game.title.toLowerCase().includes(searchTerm) || 
                 (game.category && game.category.toLowerCase().includes(searchTerm)) ||
                 game.file.toLowerCase().includes(searchTerm)
             );
-            
+
             renderGames(filteredGames);
             gameCount.textContent = filteredGames.length;
         }
-        
+
         // 更新游戏计数
         function updateGameCount() {
             gameCount.textContent = gamesData.length;
         }
-        
+
         // 显示加载状态
         function showLoader() {
             loader.style.display = 'block';
             gamesGrid.innerHTML = '';
             noGames.style.display = 'none';
         }
-        
+
         // 隐藏加载状态
         function hideLoader() {
             loader.style.display = 'none';
         }
     </script>
 </body>
-                        </html>
+</html>
